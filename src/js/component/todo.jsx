@@ -30,43 +30,46 @@ export const ToDo = () => {
         try {
             let respuesta = await fetch(URI)
 
-            if (respuesta.ok) {
-                let respuestaJSON = await respuesta.json()
-                setToDo(respuestaJSON)
-                console.log(listToDo)
-            } else {
-                console.log("Respuesta fallida")
-                setToDo([])
-            }
+            console.log(respuesta.ok)
+            let respuestaJSON = await respuesta.json()
+            console.log(respuestaJSON)
+            setToDo(respuestaJSON)
+            console.log(listToDo)
+
         } catch (e) {
             console.log(e)
         }
+
     }
 
     const cambiarTarea = async (indiceTarea) => {
         let URI = `${BASE_URL}user/${usuario}`;
         let arrayAux = listToDo.slice()
-        if(arrayAux[0].label == "No hay tareas"){
-            arrayAux[0]= { label: `${indiceTarea}`, done: false }
+        console.log(arrayAux[0].label)
+        if (arrayAux[0].label == "No hay tareas") {
+            arrayAux[0] = { label: `${indiceTarea}`, done: false }
+            
         } else {
             arrayAux.push({ label: `${indiceTarea}`, done: false })
+            console.log("esta es la lista" + listToDo)
         }
-        
-        setToDo(arrayAux)
 
         try {
+
             let respuesta = await fetch(URI, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(listToDo),
+                body: JSON.stringify(arrayAux),
 
             })
             console.log(respuesta.ok)
-                let respuestaJSON = await respuesta.json()
-                console.log(respuestaJSON)
-                actualizarToDos()
-            
-        } catch { (error) => { console.log(error) } }
+            let respuestaJSON = await respuesta.json()
+            console.log(respuestaJSON)
+            actualizarToDos()
+            console.log("lista actualizada")
+
+
+        } catch { (error) => { console.log("error") } }
     }
 
 
@@ -76,8 +79,21 @@ export const ToDo = () => {
         let auxArr = listToDo.filter((item, indice) => {
             return indice !== indiceTarea
         })
-
-        if (auxArr.length !== 0) {
+        console.log(auxArr.length)
+        if (auxArr.length == 0) {
+            try {
+                let respuesta = await fetch(URI, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify([{ "label": "No hay tareas", "done": true }])
+                });
+                console.log(respuesta.ok)
+                let respuestaJSON = await respuesta.json()
+                console.log(respuestaJSON)
+                setToDo(auxArr)
+                actualizarToDos()
+            } catch { (error) => { console.log(error) } }
+        } else {
             try {
                 let respuesta = await fetch(URI, {
                     method: "PUT",
@@ -87,18 +103,7 @@ export const ToDo = () => {
                 console.log(respuesta.ok)
                 let respuestaJSON = await respuesta.json()
                 console.log(respuestaJSON)
-                actualizarToDos()
-            } catch { (error) => { console.log(error) } }
-        } else {
-            try {
-                let respuesta = await fetch(URI, {
-                    method: "PUT",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify([{label:"No hay tareas", done:true}])
-                });
-                console.log(respuesta.ok)
-                let respuestaJSON = await respuesta.json()
-                console.log(respuestaJSON)
+                setToDo(auxArr)
                 actualizarToDos()
             } catch {
                 (e) => console.log(e)
